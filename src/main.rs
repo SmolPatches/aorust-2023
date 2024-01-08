@@ -2,6 +2,7 @@ use std::io::{BufRead, Read};
 use regex::Regex;
 // block can either be big string of text or a file handle
 // (any place text can come from)
+// remake to use recursion
 fn parse_block(block:&mut dyn BufRead) {
     let re = match Regex::new(r"(\d).*?(\d)") {
         Ok(x) => x,
@@ -16,9 +17,14 @@ fn parse_block(block:&mut dyn BufRead) {
             break;
         }
         // handle line matching here
-        let match_str = match re.find(&buf) {
-            Some(m) => m.as_str(),
-            None=>""
+        let match_str = match re.captures(&buf) {
+            Some(m) => {
+                let (_,[x,y]) = m.extract();
+                let mut x = String::from(x);
+                x.push_str(y);
+                x
+            },
+            None=>"".to_string()
         };
         println!("Digits:{match_str}");
         buf.clear(); // prepare buffer for next line
