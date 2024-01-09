@@ -1,7 +1,7 @@
 use std::io::{BufRead, Read};
 // recursive functions for finding matches
 // subject is the text which a match is searched for
-fn match_finder(subject:&mut str) -> String{
+fn match_finder(subject:&str) -> String{
     let ret = String::with_capacity(2);
     match_helper(&subject,ret)
 }
