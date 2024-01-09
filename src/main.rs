@@ -34,7 +34,7 @@ fn match_helper(subject:&str,ret:String) -> String {
     // if it is put it again
     // return ret if no characters left in string
     if ret.len() == 1 {
-        return ret.repeat(1);
+        return ret.repeat(2);
     }
     ret
 }
