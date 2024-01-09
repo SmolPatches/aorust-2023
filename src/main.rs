@@ -1,39 +1,64 @@
 use std::io::{BufRead, Read};
-use regex::Regex;
+// recursive functions for finding matches
+// subject is the text which a match is searched for
+fn match_finder(subject:&mut str) -> String{
+    let ret = String::with_capacity(2);
+    match_helper(&subject,ret)
+}
+// ret is a string that is changed recursively(will contain match result at the end of recursive workflow)
+fn match_helper(subject:&str,ret:String) -> String {
+    if let Some(front) = subject.chars().next() {
+        return match front {
+            // add char to ret if letter is number
+            front if front.is_digit(10) => {
+                // shadow ret with a new one
+                let mut ret = ret;
+                if ret.len() < 2 {
+                    ret.push(front)
+                } else {
+                    // https://doc.rust-lang.org/std/primitive.char.html#method.encode_utf8
+                    // current code allocates on heap, from utf8 can use a buffer to convert without allocation.
+                    // this line will run various times due to recursion so maybe use a buffer
+                    let mut utf8_buff = [0;4];
+                    ret.replace_range(1..2,front.encode_utf8(&mut utf8_buff)); // consider char char.encode_utf8 for performance
+                }
+                match_helper(&subject[1..], ret)
+            },
+            // skip if char is letter
+            _ => {
+                match_helper(&subject[1..], ret)
+            }
+        }
+    }
+    // check if ret is one value
+    // if it is put it again
+    // return ret if no characters left in string
+    if ret.len() == 1 {
+        return ret.repeat(1);
+    }
+    ret
+}
 // block can either be big string of text or a file handle
 // (any place text can come from)
 // remake to use recursion
 fn parse_block(block:&mut dyn BufRead) {
-    let re = match Regex::new(r"(\d).*?(\d)") {
-        Ok(x) => x,
-        Err(e) => panic!("Failed to build digit parsing regex.\n{e}")
-    };
-    let mut buf = String::with_capacity(64); // allocate one big size to minimize frequency of allocations
     //make a char buffer
-    let mut count:usize = 0;  // # of reads
+    let mut buf = String::with_capacity(64); // allocate one big size to minimize frequency of allocations
+    let mut _count:usize = 0;  // # of reads for debug purposes
     while let Ok(n) = block.read_line(&mut buf) {
         if n == 0 {
             //print!("{}",count);
             break;
         }
         // handle line matching here
-        let match_str = match re.captures(&buf) {
-            Some(m) => {
-                let (_,[x,y]) = m.extract();
-                let mut x = String::from(x);
-                x.push_str(y);
-                x
-            },
-            None=>"".to_string()
-        };
-        println!("Digits:{match_str}");
+        println!("Digits:{}",match_finder(&mut buf));
         buf.clear(); // prepare buffer for next line
-        count+=1;
+        _count+=1;
     }
     // do rest of parsing
 }    
 fn main() {
     let mut txt = String::new();
-    std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt);
+    std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
     parse_block(&mut txt.as_bytes());
 }
