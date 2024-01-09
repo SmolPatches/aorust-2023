@@ -41,7 +41,9 @@ fn match_helper(subject:&str,ret:String) -> String {
 // block can either be big string of text or a file handle
 // (any place text can come from)
 // remake to use recursion
-fn parse_block(block:&mut dyn BufRead) {
+fn parse_block(block:&mut dyn BufRead) -> i32 {
+    // sum of digits
+    let mut sum_vec: Vec<i32> = Vec::new();
     //make a char buffer
     let mut buf = String::with_capacity(64); // allocate one big size to minimize frequency of allocations
     let mut _count:usize = 0;  // # of reads for debug purposes
@@ -51,14 +53,21 @@ fn parse_block(block:&mut dyn BufRead) {
             break;
         }
         // handle line matching here
-        println!("Digits:{}",match_finder(&mut buf));
+        let digits_str = match_finder(&mut buf);
+        println!("Digits:{}",digits_str);
+        if digits_str == "" || digits_str == "00" {
+            continue;
+        } 
+        let digits:i32 = digits_str.parse().expect("Error converting value: {digits_str}");
+        sum_vec.push(digits);
         buf.clear(); // prepare buffer for next line
         _count+=1;
     }
     // do rest of parsing
+    sum_vec.into_iter().reduce(|sum,x| sum + x).expect("Err summing vec...")
 }    
 fn main() {
     let mut txt = String::new();
     std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
-    parse_block(&mut txt.as_bytes());
+    println!("Sum is {}",parse_block(&mut txt.as_bytes()))
 }
