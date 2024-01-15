@@ -21,6 +21,7 @@
           buildInputs = [
             eza
             fd
+	    rust-analyzer
             # install rust with rust_analyzer
             (rust-bin.stable.latest.default.override {
                 extensions = [ "rust-src" ];
