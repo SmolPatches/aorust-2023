@@ -1,4 +1,38 @@
 use std::io::{BufRead, Read};
+use std::collections::HashMap;
+use std::cell::RefCell;
+// screen word for words as digits
+fn screen_str(src:RefCell<String>) {
+    let screen_iter = vec![
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "zero",
+    ];
+    let replace_ptrn = HashMap::from([
+        ("one","1"),
+        ("two","2"),
+        ("three","3"),
+        ("four","4"),
+        ("five","5"),
+        ("six","6"),
+        ("seven","7"),
+        ("eight","8"),
+        ("nine","9"),
+        ("zero","0"),
+    ]);
+    // screen the src for each word in screen_iter 
+    for word in screen_iter {
+        let value = src.borrow_mut();
+        src.replace(value.replace(replace_ptrn[word],word));
+    }
+}
 // recursive functions for finding matches
 // subject is the text which a match is searched for
 fn match_finder(subject:&str) -> String{
