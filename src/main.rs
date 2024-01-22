@@ -1,8 +1,10 @@
 use std::io::{BufRead, Read};
 use std::collections::HashMap;
-use std::cell::RefCell;
+use priority_queue::DoublePriorityQueue; 
+
 // screen word for words as digits
-fn screen_str(src:RefCell<String>) {
+fn screen_str(src:&str) -> String {
+    let mut res = String::with_capacity(src.len());
     let screen_iter = vec![
         "one",
         "two",
@@ -15,23 +17,35 @@ fn screen_str(src:RefCell<String>) {
         "nine",
         "zero",
     ];
+    // note that words aren't burnt one translated
+    // ex: eighttwo -> 82 not 8wo
     let replace_ptrn = HashMap::from([
-        ("one","1"),
-        ("two","2"),
-        ("three","3"),
-        ("four","4"),
-        ("five","5"),
-        ("six","6"),
-        ("seven","7"),
-        ("eight","8"),
-        ("nine","9"),
-        ("zero","0"),
+        ("one","o1e"),
+        ("two","t2o"),
+        ("three","t3e"),
+        ("four","f4r"),
+        ("five","f5e"),
+        ("six","s6x"),
+        ("seven","s7n"),
+        ("eight","e8t"),
+        ("nine","n9e"),
+        //("zero","z0o"),
     ]);
-    // screen the src for each word in screen_iter 
+    res.push_str(src);
+    // min priority priority_queue
+    let mut pmin_queue: DoublePriorityQueue<&str,usize>= DoublePriorityQueue::new();
+    // find match and put words that matched with a lower index in a data structure to replace
     for word in screen_iter {
-        let value = src.borrow_mut();
-        src.replace(value.replace(replace_ptrn[word],word));
+        if let Some(idx) = res.find(word) {
+            // insert index into priority queue
+            pmin_queue.push(word,idx);
+        }
     }
+    // go down data struct and replace from least to greatest
+    while let Some((word,_)) = pmin_queue.pop_min() {
+        res = res.replace(word,replace_ptrn[word]);
+    }
+    return res;
 }
 // recursive functions for finding matches
 // subject is the text which a match is searched for
@@ -87,12 +101,13 @@ fn parse_block(block:&mut dyn BufRead) -> i32 {
             break;
         }
         // handle line matching here
-        let digits_str = match_finder(&mut buf);
-        println!("Digits:{}",digits_str);
+        let screened_str = screen_str(&buf); 
+        let digits_str = match_finder(&screened_str);
         if digits_str == "" || digits_str == "00" {
             continue;
         } 
         let digits:i32 = digits_str.parse().expect("Error converting value: {digits_str}");
+        println!("{}->{}",buf,digits);
         sum_vec.push(digits);
         buf.clear(); // prepare buffer for next line
         _count+=1;
@@ -102,6 +117,31 @@ fn parse_block(block:&mut dyn BufRead) -> i32 {
 }    
 fn main() {
     let mut txt = String::new();
-    std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
-    println!("Sum is {}",parse_block(&mut txt.as_bytes()))
+    std::fs::File::open("input2-1.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+    let sum = parse_block(&mut txt.as_bytes());
+    println!("Part 2 Sum: {}",sum)
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+    #[test]
+    fn input_1(){
+        let mut txt = String::new();
+        std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+        assert_eq!(142,parse_block(&mut txt.as_bytes()));
+
+    }
+    #[test]
+    fn input_2(){
+        let mut txt = String::new();
+        std::fs::File::open("input2.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+        assert_eq!(281,parse_block(&mut txt.as_bytes()));
+    }
+
+    #[test]
+    fn input_3(){
+        let mut txt = String::from("eightwo\n");
+        assert_eq!(78,parse_block(&mut txt.as_bytes()));
+    }
 }
