@@ -53,6 +53,7 @@ pub fn unnamed_func(input:&str) -> usize {
         }).map_or(0, |id| id.as_str().parse().expect("couldn't parse id"));
         if dbg {
             println!("Valid line: {} with id:{}",line,id_int);
+            println!("{id_sum}+{id_int}:{}",id_sum+id_int);
         }
         id_sum + id_int
     });
