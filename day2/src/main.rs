@@ -1,35 +1,37 @@
 use regex::Regex;
 // cube conudrum
 struct RGB {
-    r: u8,
-    g: u8,
-    b: u8,
+    r: usize,
+    g: usize,
+    b: usize,
 }
 const max_rgb: RGB = RGB { // max rgb value acceptable
    r:  12,
    g:  13,
    b:  14,
 };
-const dbg:bool = false; // set true to print additional logs
-fn unnamed_func(input:&str) {
+const dbg:bool = true; // set true to print additional logs
+const verbose:bool = false; // set to true to print most logs
+
+// given a str return the sum of the id's of valid game lines
+fn unnamed_func(input:&str) -> usize {
     let mut counter = 0;
-    let game_pattern = Regex::new(r"^Game\s+\d+:(\s+\d+\s+(red|green|blue),?);?").unwrap();
+    let game_pattern = Regex::new(r"^Game\s+(?<id>\d)+:(\s+\d+\s+(red|green|blue),?);?").unwrap();
     //let color_pattern = Regex::new(r"(\s+(\d+)\s+(red|green|blue),?);?").unwrap();
     let color_pattern = Regex::new(r"(\s+(\d+)\s+(red|green|blue),?;?)").unwrap(); // counts semi
                                                                                    // colon
                                                                                    // seperator
                                                                                    // in captures
     let validate_line = |line:&str| game_pattern.is_match(line);
-    // iterate over valid lines
-    input.split("\n").into_iter().filter( |line| validate_line(line)).filter(|&line| {
+    let ans = input.split("\n").into_iter().filter( |line| validate_line(line)).filter(|&line| {
         counter += 1;
-        if dbg {
+        if dbg && verbose{
             println!("Line {}: {:?}",counter,line);
         }
         //for x in color_pattern.find_iter(line).map(|m| m.as_str()) {
         for (cap, [_,num,color]) in color_pattern.captures_iter(line).map(|m| m.extract()) {
-            let num_u8:u8 = num.parse().expect("num wasnt u8");
-            if dbg {
+            let num_u8:usize = num.parse().expect("num wasnt usize");
+            if dbg && verbose{
                 println!("Full Capture: {}\tNum:{}\tColor:{}",cap,num,color);
             }
             match color.to_ascii_lowercase().as_str() {
@@ -41,10 +43,23 @@ fn unnamed_func(input:&str) {
             };
         }
         true
-    }).for_each(|line| {
-        println!("Valid: {}",line);
-        // add up game ids
+    // try reducing this to get a map
+    }).fold(0,|id_sum,line| {
+        // add up game id
+        // get Some(Some(match)) to Some(match)
+        // then map none to 0 and Some(match) to integer id value
+        let id_int:usize = game_pattern.captures(line).and_then(|cap| {
+            cap.name("id")
+        }).map_or(0, |id| id.as_str().parse().expect("couldn't parse id"));
+        if dbg {
+            println!("Valid line: {} with id:{}",line,id_int);
+        }
+        id_sum + id_int
     });
+    if dbg {
+        println!("Result is: {}",ans);
+    }
+    ans
 }
 fn main() {
     unnamed_func(&
