@@ -14,7 +14,7 @@ const dbg:bool = true; // set true to print additional logs
 const verbose:bool = false; // set to true to print most logs
 
 // given a str return the sum of the id's of valid game lines
-fn unnamed_func(input:&str) -> usize {
+pub fn unnamed_func(input:&str) -> usize {
     let mut counter = 0;
     let game_pattern = Regex::new(r"^Game\s+(?<id>\d)+:(\s+\d+\s+(red|green|blue),?);?").unwrap();
     //let color_pattern = Regex::new(r"(\s+(\d+)\s+(red|green|blue),?);?").unwrap();
@@ -61,12 +61,12 @@ fn unnamed_func(input:&str) -> usize {
     }
     ans
 }
-fn main() {
-    unnamed_func(&
+pub fn main() {
+    println!("id sum:{}",unnamed_func(&
                  {
-                     let mut x = String::from(std::fs::read_to_string("input.txt").unwrap());
+                     let mut x = String::from(std::fs::read_to_string("inputs/d2-input.txt").unwrap());
                      x.push_str("Heya"); // this is a test string, it shouldn't be present in
                                          // parsing because filtering will get it out 
                     x
-                 });
+                 }))
 }

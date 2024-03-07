@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use priority_queue::DoublePriorityQueue; 
 
 // screen word for words as digits
-fn screen_str(src:&str) -> String {
+pub fn screen_str(src:&str) -> String {
     let mut res = String::with_capacity(src.len());
     let screen_iter = vec![
         "one",
@@ -49,12 +49,12 @@ fn screen_str(src:&str) -> String {
 }
 // recursive functions for finding matches
 // subject is the text which a match is searched for
-fn match_finder(subject:&str) -> String{
+pub fn match_finder(subject:&str) -> String{
     let ret = String::with_capacity(2);
     match_helper(&subject,ret)
 }
 // ret is a string that is changed recursively(will contain match result at the end of recursive workflow)
-fn match_helper(subject:&str,ret:String) -> String {
+pub fn match_helper(subject:&str,ret:String) -> String {
     if let Some(front) = subject.chars().next() {
         return match front {
             // add char to ret if letter is number
@@ -89,7 +89,7 @@ fn match_helper(subject:&str,ret:String) -> String {
 // block can either be big string of text or a file handle
 // (any place text can come from)
 // remake to use recursion
-fn parse_block(block:&mut dyn BufRead) -> i32 {
+pub fn parse_block(block:&mut dyn BufRead) -> i32 {
     // sum of digits
     let mut sum_vec: Vec<i32> = Vec::new();
     //make a char buffer
@@ -115,27 +115,27 @@ fn parse_block(block:&mut dyn BufRead) -> i32 {
     // do rest of parsing
     sum_vec.into_iter().reduce(|sum,x| sum + x).expect("Err summing vec...")
 }    
-fn main() {
+pub fn main() {
     let mut txt = String::new();
-    std::fs::File::open("input2-1.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+    std::fs::File::open("inputs/d1-input2-1.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
     let sum = parse_block(&mut txt.as_bytes());
     println!("Part 2 Sum: {}",sum)
 }
 
 #[cfg(test)]
-mod test {
-    use crate::*;
+pub mod test {
+    use crate::aoc::day1::*;
     #[test]
     fn input_1(){
         let mut txt = String::new();
-        std::fs::File::open("input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+        std::fs::File::open("inputs/d1-input.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
         assert_eq!(142,parse_block(&mut txt.as_bytes()));
 
     }
     #[test]
     fn input_2(){
         let mut txt = String::new();
-        std::fs::File::open("input2.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
+        std::fs::File::open("inputs/d1-input2.txt").unwrap().read_to_string(&mut txt).expect("ERR:could not find input.txt file");
         assert_eq!(281,parse_block(&mut txt.as_bytes()));
     }
 
